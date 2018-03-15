@@ -19,8 +19,16 @@ namespace TechJobs.Controllers
         public IActionResult Index(int id)
         {
             // TODO #1 - get the Job with the given ID and pass it into the view
+            Job theJob = jobData.Find(id);
+            NewJobViewModel theRealJob = new NewJobViewModel();
 
-            return View();
+            theRealJob.Name = theJob.Name;
+            theRealJob.EmployerID = theJob.Employer.ID;
+            theRealJob.CoreCompetencyID = theJob.CoreCompetency.ID;
+            theRealJob.LocationID = theJob.Location.ID;
+            theRealJob.PositionTypeID = theJob.PositionType.ID;
+
+            return View(theJob);
         }
 
         public IActionResult New()
@@ -36,7 +44,19 @@ namespace TechJobs.Controllers
             // new Job and add it to the JobData data store. Then
             // redirect to the Job detail (Index) action/view for the new Job.
 
-            return View(newJobViewModel);
+           if (ModelState.IsValid)
+            {
+                Job newJob = new Job
+                {
+                    Name = newJobViewModel.Name,
+                    Employer = jobData.Employers.Find(newJobViewModel.EmployerID),
+                    Location = jobData.Locations.Find(newJobViewModel.LocationID),
+                    CoreCompetency = jobData.CoreCompetencies.Find(newJobViewModel.CoreCompetencyID),
+                    PositionType = jobData.PositionTypes.Find(newJobViewModel.PositionTypeID)
+                };
+
+                jobData.Jobs.Add(newJob);
+                return Redirect(String.Format("/job?id={0}", newJob.ID));
         }
     }
 }
